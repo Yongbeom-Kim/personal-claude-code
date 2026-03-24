@@ -23,7 +23,7 @@ You MUST create a task for each of these items and complete them in order:
 
 1. **View and Register Tools**: Index all available MCP servers by executing the `register-development-tools` skill.
 2. **Explore project context**: check files, docs, recent commits
-3. **Ask Clarifying Questions**: Ask **THREE ROUNDS** of clarifying questions, each round asking between 7-10 questions to the user. With this, understand purpose, constraints, and intended design. After each round, go back and further explore the project context.
+3. **Ask Clarifying Questions**: Ask **THREE ROUNDS** of clarifying questions, each round asking between 10-15 questions to the user. With this, understand purpose, constraints, and intended design. After each round, go back and further explore the project context.
     - <WARNING>NO CLARIFICATION IS TOO SMALL TO ASK. A great deal of wasted work lies in simple but miscommunicated "assumptions" that has to be corrected later on.</WARNING>
     - Since there are many questions in each round, write it to `${PWD}/CLARIFICATIONS.md`. Delete the file after each round. An example is below.
 4. **Propose 2-3 approaches**: Clearly establish trade-offs and your recommendation for human review. This is the last chance to get human feedback, so be thorough.
@@ -38,22 +38,18 @@ You MUST create a task for each of these items and complete them in order:
 
 ```md
 # Clarifications:
-1. [Question]
-> {user will write answer here}
-2. [Question]
-> {user will write answer here}
-3. [Question]
-> {user will write answer here}
-4. [Question]
-> {user will write answer here}
-5. [Question]
-> {user will write answer here}
-6. [Question]
-> {user will write answer here}
-7. [Question]
-> {user will write answer here}
-8. [Question]
-> {user will write answer here}
+Question: [Question]
+User Reply:
+
+
+Question: [Question]
+User Reply:
+
+
+Question: [Question]
+User Reply:
+
+...
 ```
 
 ## High-Level Control Flow
