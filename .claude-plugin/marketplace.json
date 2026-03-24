@@ -7,10 +7,10 @@
     },
     "plugins": [
         {
-            "name": "superpowers",
-            "description": "Plugin copied from obra/superpowers for my personal use case",
+            "name": "development",
+            "description": "Plugins for personal development. A lot of them are copied from obra/superpowers.",
             "version": "1.0.0",
-            "source": "./superpowers"
+            "source": "./development"
         }
     ]
 
