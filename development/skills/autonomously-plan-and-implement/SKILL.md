@@ -23,9 +23,9 @@ You MUST create a task for each of these items and complete them in order:
 
 1. **View and Register Tools**: Index all available MCP servers by executing the `register-development-tools` skill.
 2. **Explore project context**: check files, docs, recent commits
-3. **Ask Clarifying Questions**: Ask **THREE ROUNDS** of clarifying questions, each round asking between 10-15 questions to the user. With this, understand purpose, constraints, and intended design. After each round, go back and further explore the project context.
+3. **Ask Clarifying Questions**: Ask **4–7 ROUNDS** of clarifying questions using the `AskUserQuestion` tool, with up to 4 questions per call (1 call per round). Stop after a minimum of 4 rounds when confident all critical questions are answered. Prefer multiple-choice options when possible. After each round, re-explore the project context based on answers received.
     - <WARNING>NO CLARIFICATION IS TOO SMALL TO ASK. A great deal of wasted work lies in simple but miscommunicated "assumptions" that has to be corrected later on.</WARNING>
-    - Since there are many questions in each round, write it to `${PWD}/CLARIFICATIONS.md`. Delete the file after each round. An example is below.
+    - Suggested round themes (adapt as needed): early rounds focus on purpose/scope/success criteria, middle rounds on constraints/dependencies/edge cases, later rounds on design preferences/verification approach.
 4. **Propose 2-3 approaches**: Clearly establish trade-offs and your recommendation for human review. This is the last chance to get human feedback, so be thorough.
 5. **Write design doc**: Write a design doc at `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`.
 6. **Spec review**: Create a design-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./design-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
@@ -34,22 +34,35 @@ You MUST create a task for each of these items and complete them in order:
 9. **Implement**: invoke the `subagent-driven-execution` skill to implement the implementation plan.
 10. **Review and Verify**: Create a review-and-verify subagent. The subagent's prompt should include the design and implementation doc, as well as the prompt in `./review-and-verify-prompt.md`.
 
-### Sample `CLARIFICATIONS.md`
+### Example `AskUserQuestion` Call
 
-```md
-# Clarifications:
-Question: [Question]
-User Reply:
+Each round is a single `AskUserQuestion` call with up to 4 questions. Prefer multiple-choice options — the user can always select "Other" for free-text input.
 
-
-Question: [Question]
-User Reply:
-
-
-Question: [Question]
-User Reply:
-
-...
+```
+AskUserQuestion(
+  questions=[
+    {
+      question: "What is the primary goal of this feature?",
+      header: "Goal",
+      options: [
+        { label: "Option A", description: "Description of option A" },
+        { label: "Option B", description: "Description of option B" },
+        { label: "Option C", description: "Description of option C" }
+      ],
+      multiSelect: false
+    },
+    {
+      question: "Who is the target user?",
+      header: "Audience",
+      options: [
+        { label: "Developers", description: "Internal or external developers" },
+        { label: "End users", description: "Non-technical end users" },
+        { label: "Both", description: "Both developers and end users" }
+      ],
+      multiSelect: false
+    }
+  ]
+)
 ```
 
 ## High-Level Control Flow
@@ -61,9 +74,13 @@ def autonomously_plan_and_implement(requirement: str) -> None:
     register_development_tools()
     explore_project_context()
 
-    for round in range(3):
-        ask_clarifying_questions()  # 7-10 questions per round
+    round = 0
+    while round < 7:
+        ask_user_question(questions=4, prefer_multiple_choice=True)  # 1 call per round
         explore_project_context()   # re-explore after each round
+        round += 1
+        if round >= 4 and all_critical_questions_answered():
+            break
 
     # Phase 2: Design (main agent)
     approaches = propose_approaches(count=3)  # with tradeoffs + recommendation
@@ -89,8 +106,9 @@ def autonomously_plan_and_implement(requirement: str) -> None:
 - Check out the current project state first (files, docs, recent commits)
 - Before asking detailed questions, assess scope: if the request describes multiple independent subsystems (e.g., "build a platform with chat, file storage, billing, and analytics"), flag this immediately. Don't spend questions refining details of a project that needs to be decomposed first.
 - If the project is too large for a single spec, help the user decompose into sub-projects: what are the independent pieces, how do they relate, what order should they be built? Then brainstorm the first sub-project through the normal design flow. Each sub-project gets its own spec → plan → implementation cycle.
-- For appropriately-scoped projects, ask questions one at a time to refine the idea
-- Prefer multiple choice questions when possible, but open-ended is fine too
+- For appropriately-scoped projects, use the `AskUserQuestion` tool to ask up to 4 questions per round across 4–7 rounds
+- Prefer multiple-choice options when possible — the user can always select "Other" for free-text
+- Suggested round progression: purpose/scope → constraints/dependencies → design decisions → edge cases/verification
 - Focus on understanding: purpose, constraints, success criteria
 
 **Exploring approaches:**
