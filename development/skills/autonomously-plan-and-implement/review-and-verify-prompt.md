@@ -2,7 +2,7 @@
 
 Use this template when dispatching a review-and-verify subagent as the final quality gate after implementation.
 
-Purpose: Holistically review the entire implementation against the design spec and implementation plan, run tests, fix issues, and iterate until the codebase is clean.
+Purpose: Holistically review the entire implementation against the design spec and implementation plan, run tests, fix issues, run /simplify for code quality, and iterate until the codebase is clean and simplified.
 
 Dispatch after: All implementation tasks are complete (subagent-driven-execution is done).
 
@@ -12,7 +12,7 @@ Task tool (general-purpose):
   prompt: |
     # Review and Verify Loop Orchestration
 
-    You are a review-and-verify orchestrator. By orchestrating subagents, you must ensure the completed implementation is correct, complete, and passing all tests. You loop until there are zero issues remaining.
+    You are a review-and-verify orchestrator. By orchestrating subagents, you must ensure the completed implementation is correct, complete, passing all tests, and simplified for quality. You loop until there are zero issues and zero code changes remaining.
 
     ## Available Tools
 
@@ -26,34 +26,65 @@ Task tool (general-purpose):
     ## Review Control Flow
 
     <HARD-GATE>
-    ALWAYS SPAWN A NEW SUBAGENT FOR EACH REVIEW-AND-FIX CYCLE. As the orchestrator, NEVER review code or make fixes yourself. Your only role is to spawn subagents, relay context between iterations, and decide when the loop terminates.
+    ALWAYS SPAWN A NEW SUBAGENT FOR EACH REVIEW-AND-FIX CYCLE AND FOR EACH SIMPLIFY STEP. As the orchestrator, NEVER review code, make fixes, or simplify code yourself. Your only role is to spawn subagents, relay context between iterations, and decide when the loop terminates.
     </HARD-GATE>
 
-    This loop runs until a subagent reports zero issues and zero code changes. There is no max loop limit — quality is the only exit condition.
+    Each iteration spawns two sequential subagents: first a review-and-fix subagent, then a /simplify subagent. The loop runs until both subagents report zero changes and the review subagent reports zero issues. There is no max loop limit — quality is the only exit condition.
 
     ```python
     iterations = []
     while True:
-        result = spawn_subagent(
+        # Step 1: Review-and-fix (existing subagent)
+        review_result = spawn_subagent(
             "review_and_verify",
             inputs={
                 "spec": SPEC_FILE_PATH,
                 "plan": PLAN_FILE_PATH,
-                "prior_iterations": iterations,  # so subagent knows what was already fixed
+                "prior_iterations": iterations,
             }
         )
-        iterations.append(result)
-        if result.code_changes_made == 0 and result.issues_found == 0:
+
+        # Step 2: Simplify (new subagent)
+        simplify_result = spawn_subagent(
+            "simplify",
+            inputs={
+                "spec": SPEC_FILE_PATH,
+                "plan": PLAN_FILE_PATH,
+                "prior_iterations": iterations,
+            }
+        )
+
+        # Step 3: Merge results into single iteration record
+        merged = {
+            "review_issues_found": review_result.issues_found,
+            "review_changes_made": review_result.code_changes_made,
+            "review_details": review_result.details,
+            "review_test_results": review_result.test_results,
+            "simplify_changes_made": simplify_result.changes_made,
+            "simplify_details": simplify_result.file_summaries,
+        }
+        iterations.append(merged)
+
+        # Step 4: Exit when both subagents report zero changes and zero issues
+        total_changes = review_result.code_changes_made + simplify_result.changes_made
+        if total_changes == 0 and review_result.issues_found == 0:
             return summary_of(iterations, status="VERIFIED")
     ```
 
     ### Context Relay Between Iterations
 
-    Each new subagent MUST receive a summary of prior iterations so it does not re-discover already-fixed issues or regress previous fixes. Include:
-    - What was found and fixed in each prior iteration
-    - Any areas that were explicitly verified as correct
+    Each new subagent MUST receive a summary of prior iterations so it does not re-discover already-fixed issues or regress previous fixes. Both the review-and-fix subagent and the /simplify subagent receive prior iteration summaries.
 
-    ## Subagent Instructions
+    The review-and-fix subagent uses prior iterations to:
+    - Know what was found and fixed in each prior iteration
+    - Know what /simplify changed, so it does not flag simplifications as unexpected modifications
+    - Verify that /simplify's changes didn't break anything
+
+    The /simplify subagent uses prior iterations to:
+    - Not re-simplify code that was already simplified in a prior iteration
+    - Understand what review-and-fix changed, to avoid conflicting modifications
+
+    ## Review-and-Fix Subagent Instructions
 
     Each spawned subagent performs a single review-and-fix cycle:
 
@@ -96,9 +127,41 @@ Task tool (general-purpose):
 
     If in doubt: would this cause a bug, a test failure, or a user-visible problem? If no, skip it.
 
+    ## /simplify Subagent Instructions
+
+    After each review-and-fix subagent completes, spawn a separate subagent to run /simplify. This subagent reviews all implementation files for code quality improvements (reuse, redundancy, efficiency).
+
+    ### Spawning the /simplify Subagent
+
+    Spawn a new `general-purpose` subagent with the following prompt:
+
+    > You are a code simplification agent. Your job is to review the implementation for code quality improvements.
+    >
+    > Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`, `testing-and-verification`.
+    >
+    > **Context:**
+    > - Design spec: [SPEC_FILE_PATH]
+    > - Implementation plan: [PLAN_FILE_PATH]
+    > - Prior iteration summaries: [PRIOR_ITERATIONS_SUMMARY]
+    >
+    > **Instructions:**
+    > 1. Read the design spec and implementation plan to understand the intended design.
+    > 2. Invoke the `/simplify` skill using the Skill tool. This will review changed code for reuse, quality, and efficiency, and fix any issues found.
+    > 3. After /simplify completes, report your results in the output format below.
+    >
+    > **Output format:**
+    > ```
+    > Simplify Changes Made: N
+    > Files:
+    > - [file_path]: [1-line summary of what was changed]
+    > ```
+    > If no changes were made, report: `Simplify Changes Made: 0`
+
+    The orchestrator parses the subagent's output to extract `changes_made` (the number) and the file summaries for context relay.
+
     ## Output Format
 
-    ### Subagent Output Format (per iteration)
+    ### Review-and-Fix Subagent Output Format (per iteration)
     **Issues Found:** N
     **Code Changes Made:** N
     **Details:**
@@ -112,11 +175,11 @@ Task tool (general-purpose):
     **Status:** Verified
     **Total Iterations:** N
     **Summary of All Changes:**
-    - Iteration 1: [N issues found, N fixed] — [brief description]
-    - Iteration 2: [N issues found, N fixed] — [brief description]
+    - Iteration 1: Review [N issues, N fixes], Simplify [N files] — [description]
+    - Iteration 2: Review [N issues, N fixes], Simplify [N files] — [description]
     - ...
-    - Final Iteration: [0 issues found, 0 changes made]
+    - Final Iteration: Review [0 issues, 0 changes], Simplify [0 changes]
     **Test Results:** All passing / [details if not]
 ```
 
-Reviewer returns: Status, Total Iterations, Summary of All Changes, Test Results
+Reviewer returns: Status, Total Iterations, Summary of All Changes (including /simplify results per iteration), Test Results
