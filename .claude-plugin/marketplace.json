@@ -9,7 +9,7 @@
         {
             "name": "development",
             "description": "Plugins for personal development. A lot of them are copied from obra/superpowers.",
-            "version": "1.0.3",
+            "version": "1.0.4",
             "source": "./development"
         }
     ]
