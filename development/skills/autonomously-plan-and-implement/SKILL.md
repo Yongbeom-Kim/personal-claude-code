@@ -25,6 +25,7 @@ You MUST create a task for each of these items and complete them in order:
 2. **Explore project context**: check files, docs, recent commits
 3. **Ask Clarifying Questions**: Ask **THREE ROUNDS** of clarifying questions, each round asking between 7-10 questions to the user. With this, understand purpose, constraints, and intended design. After each round, go back and further explore the project context.
     - <WARNING>NO CLARIFICATION IS TOO SMALL TO ASK. A great deal of wasted work lies in simple but miscommunicated "assumptions" that has to be corrected later on.</WARNING>
+    - Since there are many questions in each round, write it to `${PWD}/CLARIFICATIONS.md`. Delete the file after each round. An example is below.
 4. **Propose 2-3 approaches**: Clearly establish trade-offs and your recommendation for human review. This is the last chance to get human feedback, so be thorough.
 5. **Write design doc**: Write a design doc at `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`.
 6. **Spec review**: Create a design-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./design-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
@@ -32,6 +33,28 @@ You MUST create a task for each of these items and complete them in order:
 8. **Implementation Plan Review**: Create a implementation-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./implementation-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
 9. **Implement**: invoke the `subagent-driven-execution` skill to implement the implementation plan.
 10. **Review and Verify**: Create a review-and-verify subagent. The subagent's prompt should include the design and implementation doc, as well as the prompt in `./review-and-verify-prompt.md`.
+
+### Sample `CLARIFICATIONS.md`
+
+```md
+# Clarifications:
+1. [Question]
+> {user will write answer here}
+2. [Question]
+> {user will write answer here}
+3. [Question]
+> {user will write answer here}
+4. [Question]
+> {user will write answer here}
+5. [Question]
+> {user will write answer here}
+6. [Question]
+> {user will write answer here}
+7. [Question]
+> {user will write answer here}
+8. [Question]
+> {user will write answer here}
+```
 
 ## High-Level Control Flow
 
