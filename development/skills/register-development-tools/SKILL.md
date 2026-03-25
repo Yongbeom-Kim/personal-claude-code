@@ -31,9 +31,9 @@ Every MCP tool must be categorized under exactly one of these phases. These phas
 | `context-and-research` | Exploring the codebase, fetching external documentation, understanding project structure | Main agent during clarification; all subagents for orientation |
 | `design-and-planning` | Writing and reviewing design specs and implementation plans | Main agent; design-spec-reviewer; implementation-spec-reviewer |
 | `code-implementation` | Writing code, semantic code retrieval, code generation | Implementer subagents |
-| `testing-and-verification` | Running test suites, linters, type checkers, IDE diagnostics | Implementer subagents; review-and-verify subagent |
-| `e2e-verification` | Browser automation, API testing, integration testing against running services | Review-and-verify subagent |
-| `code-review` | Static analysis, code quality scanning, complexity analysis | Code quality reviewer; spec compliance reviewer; review-and-verify subagent |
+| `testing-and-verification` | Running test suites, linters, type checkers, IDE diagnostics | Implementer subagents; review-and-fix subagent |
+| `e2e-verification` | Browser automation, API testing, integration testing against running services | Review-and-fix subagent |
+| `code-review` | Static analysis, code quality scanning, complexity analysis | Code quality reviewer; spec compliance reviewer; review-and-fix subagent |
 
 ### Phase-to-Workflow Mapping
 
@@ -51,7 +51,7 @@ autonomously-plan-and-implement workflow:
 ├─ Step 9: Implement (per task) ──────── code-implementation, testing-and-verification
 │   ├─ Spec compliance review ────────── code-review
 │   └─ Code quality review ──────────── code-review
-└─ Step 10: Review and verify ────────── code-review, testing-and-verification, e2e-verification
+└─ Step 10: Review and fix ──────────── code-review, testing-and-verification, e2e-verification
 ```
 
 ## Example TOOLS.md

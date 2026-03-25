@@ -32,7 +32,7 @@ You MUST create a task for each of these items and complete them in order:
 7. **Write implementation plan**: Invoke the `write-implementation-plan` skill to create the implementation plan.
 8. **Implementation Plan Review**: Create a implementation-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./implementation-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
 9. **Implement**: invoke the `subagent-driven-execution` skill to implement the implementation plan.
-10. **Review and Verify**: Create a review-and-verify subagent. The subagent's prompt should include the design and implementation doc, as well as the prompt in `./review-and-verify-prompt.md`.
+10. **Review and Fix**: Invoke the `review-and-fix` skill. When calling from this workflow, pass the design spec path and implementation plan path as context: `BASE_SHA` (the commit before implementation began), `SPEC_FILE_PATH`, and `PLAN_FILE_PATH`. The skill runs in a subagent and handles its own review loop.
 
 ### Example `AskUserQuestion` Call
 
@@ -97,7 +97,7 @@ def autonomously_plan_and_implement(requirement: str) -> None:
     # Phase 4: Execution (subagents)
     read_and_catch_up_with_updates(implementation_plan)
     implementation = invoke_subagent("implementation", input=implementation_plan)
-    invoke_subagent("review-and-verify", input=(design_doc, implementation))
+    invoke_skill("review-and-fix", base_sha=pre_implementation_sha, spec=design_doc, plan=implementation_plan)
 ```
 
 ## The Process
