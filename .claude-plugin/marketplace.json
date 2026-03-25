@@ -11,7 +11,12 @@
             "description": "Plugins for personal development. A lot of them are copied from obra/superpowers.",
             "version": "1.0.5",
             "source": "./development"
+        },
+        {
+            "name": "learning",
+            "description": "Plugin for guided learning through Socratic instruction.",
+            "version": "1.0.0",
+            "source": "./learning"
         }
     ]
-
 }
