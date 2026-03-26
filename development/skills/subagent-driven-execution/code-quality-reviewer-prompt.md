@@ -7,14 +7,32 @@ Use this template when dispatching a code quality reviewer subagent.
 **Only dispatch after spec compliance review passes.**
 
 ```
-Task tool (superpowers:code-reviewer):
-  Use template at requesting-code-review/code-reviewer.md
+Task tool (general-purpose):
+  description: "Code quality review for Task N"
+  prompt: |
+    You are reviewing code quality for a completed implementation task.
 
-  WHAT_WAS_IMPLEMENTED: [from implementer's report]
-  PLAN_OR_REQUIREMENTS: Task N from [plan-file]
-  BASE_SHA: [commit before task]
-  HEAD_SHA: [current commit]
-  DESCRIPTION: [task summary]
+    ## Available Tools
+
+    Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`, `context-and-research`.
+
+    ## What Was Implemented
+
+    [WHAT_WAS_IMPLEMENTED: from implementer's report]
+
+    ## Plan/Requirements
+
+    [PLAN_OR_REQUIREMENTS: Task N from plan-file]
+
+    ## Git Range
+
+    BASE_SHA: [commit before task]
+    HEAD_SHA: [current commit]
+
+    ## Your Job
+
+    Review the code changes between BASE_SHA and HEAD_SHA for quality.
+    Read the actual changed files using `git diff BASE_SHA HEAD_SHA`.
 ```
 
 **Available Tools:** Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`.
