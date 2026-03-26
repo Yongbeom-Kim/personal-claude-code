@@ -29,7 +29,8 @@ A Claude Code plugin marketplace by Kim Yongbeom. It provides development and le
 
 Skills for code development workflows. Many are derived from [obra/superpowers](https://github.com/obra/superpowers/tree/main).
 
-- **`/development:autonomously-plan-and-implement`**: Turn ideas into fully-tested implementations through collaborative design, planning, and subagent execution.
+- **`/development:design-and-plan`**: Turn ideas into reviewed design specs and implementation plans through collaborative dialogue. Produces artifacts on disk.
+- **`/development:implement-from-plan`**: Execute a design spec and implementation plan with fresh context. Pair with `design-and-plan`.
 - **`/development:write-implementation-plan`**: Create a detailed, step-by-step implementation plan from a design spec.
 - **`/development:subagent-driven-execution`**: Execute implementation plans using specialized subagents with spec compliance and code quality reviews.
 - **`/development:review-and-fix`**: Review code changes with 4 parallel specialized reviewers and iterate until issues are resolved.

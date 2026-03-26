@@ -24,7 +24,7 @@ Complete the following items in order:
 
 ## Development Phase Enum
 
-Every MCP tool must be categorized under exactly one of these phases. These phases correspond to the stages of the `autonomously-plan-and-implement` workflow.
+Every MCP tool must be categorized under exactly one of these phases. These phases correspond to the stages of the `design-and-plan` and `implement-from-plan` workflows.
 
 | Phase | Description | Who Uses It |
 |-------|-------------|-------------|
@@ -38,7 +38,7 @@ Every MCP tool must be categorized under exactly one of these phases. These phas
 ### Phase-to-Workflow Mapping
 
 ```
-autonomously-plan-and-implement workflow:
+design-and-plan (Phase A — design & planning):
 │
 ├─ Step 1: Register tools ────────────── (produces TOOLS.md)
 ├─ Step 2: Explore context ───────────── context-and-research
@@ -47,11 +47,16 @@ autonomously-plan-and-implement workflow:
 ├─ Step 5: Write design doc ──────────── design-and-planning
 ├─ Step 6: Design spec review ────────── design-and-planning
 ├─ Step 7: Write implementation plan ─── design-and-planning
-├─ Step 8: Implementation plan review ── design-and-planning
-├─ Step 9: Implement (per task) ──────── code-implementation, testing-and-verification
+└─ Step 8: Implementation plan review ── design-and-planning
+
+implement-from-plan (Phase B — execution, fresh context):
+│
+├─ Step 1: Register tools ────────────── (produces TOOLS.md)
+├─ Step 2: Read artifacts from disk ──── context-and-research
+├─ Step 3: Implement (per task) ──────── code-implementation, testing-and-verification
 │   ├─ Spec compliance review ────────── code-review
 │   └─ Code quality review ──────────── code-review
-└─ Step 10: Review and fix ──────────── code-review, testing-and-verification, e2e-verification
+└─ Step 4: Review and fix ───────────── code-review, testing-and-verification, e2e-verification
 ```
 
 ## Example TOOLS.md

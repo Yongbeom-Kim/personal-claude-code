@@ -17,15 +17,15 @@ non-functional concerns MUST be addressed before the loop can exit.
 ## When to Use
 
 - **Standalone:** User invokes `/review-and-fix` directly after making changes
-- **Embedded:** Called from `autonomously-plan-and-implement` as the final review step (runs in a subagent)
+- **Embedded:** Called from `implement-from-plan` as the final review step (runs in a subagent)
 
 ## Inputs
 
 | Input | Required | Source |
 |---|---|---|
 | `BASE_SHA` | No | User argument or interactive ask. Diff is always base_sha vs working tree. |
-| `SPEC_FILE_PATH` | No | Passed by `autonomously-plan-and-implement` |
-| `PLAN_FILE_PATH` | No | Passed by `autonomously-plan-and-implement` |
+| `SPEC_FILE_PATH` | No | Passed by `implement-from-plan` |
+| `PLAN_FILE_PATH` | No | Passed by `implement-from-plan` |
 
 If `BASE_SHA` is not provided as an argument, ask the user interactively:
 
