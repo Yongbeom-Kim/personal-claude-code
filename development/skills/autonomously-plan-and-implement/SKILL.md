@@ -29,7 +29,12 @@ You MUST create a task for each of these items and complete them in order:
 4. **Propose 2-3 approaches**: Clearly establish trade-offs and your recommendation for human review. This is the last chance to get human feedback, so be thorough.
 5. **Write design doc**: Write a design doc at `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`.
 6. **Spec review**: Create a design-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./design-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
-7. **Write implementation plan**: Invoke the `write-implementation-plan` skill to create the implementation plan.
+
+<HARD-GATE>
+Do NOT start writing the implementation plan (step 7) until the design-spec-reviewer subagent from step 6 has fully completed and you have read its output. You MUST wait for the subagent result, read the updated design doc incorporating any review changes, and only then proceed. Do NOT launch the design-spec-reviewer in the background — run it in the foreground so you block on its result.
+</HARD-GATE>
+
+7. **Write implementation plan**: Read the (potentially updated) design doc first, then invoke the `write-implementation-plan` skill to create the implementation plan.
 8. **Implementation Plan Review**: Create a implementation-spec-document-reviewer subagent with precisely crafted review context (never your session history). The prompt in `./implementation-spec-document-reviewer-prompt.md` should be part of the subagent's system prompt.
 9. **Implement**: invoke the `subagent-driven-execution` skill to implement the implementation plan.
 10. **Review and Fix**: Invoke the `review-and-fix` skill. When calling from this workflow, pass the design spec path and implementation plan path as context: `BASE_SHA` (the commit before implementation began), `SPEC_FILE_PATH`, and `PLAN_FILE_PATH`. The skill runs in a subagent and handles its own review loop.
@@ -87,10 +92,13 @@ def autonomously_plan_and_implement(requirement: str) -> None:
     approved_approach = wait_for_human_approval(approaches)
     design_doc = write_design_doc(approved_approach)
 
-    changes = invoke_subagent("design-spec-reviewer", input=design_doc)
+    # IMPORTANT: run in foreground — must block until review completes
+    changes = invoke_subagent("design-spec-reviewer", input=design_doc, run_in_background=False)
+
+    # --- HARD GATE: do not proceed until design-spec-reviewer has returned ---
 
     # Phase 3: Implementation Planning (main agent)
-    read_and_catch_up_with_updates(design_doc)
+    read_and_catch_up_with_updates(design_doc)  # re-read design doc with any review changes
     implementation_plan = write_implementation_plan(design_doc)
     changes = invoke_subagent("implementation-spec-reviewer", input=implementation_plan)
 
