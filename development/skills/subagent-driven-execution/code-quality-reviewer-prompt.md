@@ -1,46 +1,42 @@
-# Code Quality Reviewer Prompt Template
-
-Use this template when dispatching a code quality reviewer subagent.
-
-**Purpose:** Verify implementation is well-built (clean, tested, maintainable)
-
-**Only dispatch after spec compliance review passes.**
-
-```
-Task tool (general-purpose):
+---
+agent:
+  subagent_type: general-purpose
   description: "Code quality review for Task N"
-  prompt: |
-    You are reviewing code quality for a completed implementation task.
+placeholders:
+  - "[WHAT_WAS_IMPLEMENTED]: From implementer's report"
+  - "[PLAN_OR_REQUIREMENTS]: Task N from plan file"
+  - "[BASE_SHA]: Commit before task"
+  - "[HEAD_SHA]: Current commit"
+---
 
-    ## Available Tools
+You are reviewing code quality for a completed implementation task.
 
-    Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`, `context-and-research`.
+## Available Tools
 
-    ## What Was Implemented
+Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`, `context-and-research`.
 
-    [WHAT_WAS_IMPLEMENTED: from implementer's report]
+## What Was Implemented
 
-    ## Plan/Requirements
+[WHAT_WAS_IMPLEMENTED: from implementer's report]
 
-    [PLAN_OR_REQUIREMENTS: Task N from plan-file]
+## Plan/Requirements
 
-    ## Git Range
+[PLAN_OR_REQUIREMENTS: Task N from plan-file]
 
-    BASE_SHA: [commit before task]
-    HEAD_SHA: [current commit]
+## Git Range
 
-    ## Your Job
+BASE_SHA: [BASE_SHA]
+HEAD_SHA: [HEAD_SHA]
 
-    Review the code changes between BASE_SHA and HEAD_SHA for quality.
-    Read the actual changed files using `git diff BASE_SHA HEAD_SHA`.
-```
+## Your Job
 
-**Available Tools:** Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `code-review`.
+Review the code changes between BASE_SHA and HEAD_SHA for quality.
+Read the actual changed files using `git diff BASE_SHA HEAD_SHA`.
 
-**In addition to standard code quality concerns, the reviewer should check:**
+In addition to standard code quality concerns, check:
 - Does each file have one clear responsibility with a well-defined interface?
 - Are units decomposed so they can be understood and tested independently?
 - Is the implementation following the file structure from the plan?
 - Did this implementation create new files that are already large, or significantly grow existing files? (Don't flag pre-existing file sizes — focus on what this change contributed.)
 
-**Code reviewer returns:** Strengths, Issues (Critical/Important/Minor), Assessment
+Report: Strengths, Issues (Critical/Important/Minor), Assessment

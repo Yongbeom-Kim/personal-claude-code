@@ -22,9 +22,9 @@ Create a task for each step and complete them in order:
     - Early rounds: purpose/scope/success criteria. Middle: constraints/dependencies/edge cases. Later: design preferences/verification.
 4. **Propose 2-3 approaches**: Trade-offs and your recommendation. This is the last human feedback before autonomous work.
 5. **Write design doc**: Save to `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`.
-6. **Design spec review**: Dispatch a foreground subagent using `./design-spec-document-reviewer-prompt.md`. Do NOT proceed until it completes and you've read its output.
+6. **Design spec review**: Read `./design-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`). Do NOT proceed until the agent completes and you've read its output.
 7. **Write implementation plan**: Re-read the (potentially updated) design doc, then invoke the `write-implementation-plan` skill.
-8. **Implementation plan review**: Dispatch a subagent using `./implementation-spec-document-reviewer-prompt.md`.
+8. **Implementation plan review**: Read `./implementation-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`).
 
 ### Output
 

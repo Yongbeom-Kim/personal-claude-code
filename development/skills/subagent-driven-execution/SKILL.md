@@ -93,9 +93,11 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 ## Prompt Templates
 
-- `./implementer-prompt.md` - Dispatch implementer subagent
-- `./spec-compliance-reviewer-prompt.md` - Dispatch spec compliance reviewer subagent
-- `./code-quality-reviewer-prompt.md` - Dispatch code quality reviewer subagent
+Each prompt file has a yaml frontmatter with `agent.subagent_type` and `agent.description`. Read the file, fill in the placeholders, and pass the content below `---` as the prompt to the **Agent tool**.
+
+- `./implementer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`)
+- `./spec-compliance-reviewer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`)
+- `./code-quality-reviewer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`)
 
 ## Example Workflow
 
