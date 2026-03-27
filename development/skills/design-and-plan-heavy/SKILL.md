@@ -1,6 +1,6 @@
 ---
-name: design-and-plan
-description: "Turn ideas into reviewed design specs and implementation plans through collaborative dialogue. Produces artifacts on disk; invoke `implement-from-plan` separately to execute."
+name: design-and-plan-heavy
+description: "Thorough design and planning workflow with up to 5 review iterations. Turn ideas into reviewed design specs and implementation plans through collaborative dialogue. Produces artifacts on disk; invoke `implement-from-plan` separately to execute."
 ---
 
 # Design and Plan

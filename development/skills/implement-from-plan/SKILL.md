@@ -1,11 +1,11 @@
 ---
 name: implement-from-plan
-description: "Execute a design spec and implementation plan produced by design-and-plan. Starts with fresh context — reads all requirements from disk."
+description: "Execute a design spec and implementation plan produced by design-and-plan-heavy or design-and-plan-light. Starts with fresh context — reads all requirements from disk."
 ---
 
 # Implement from Plan
 
-Execute an implementation plan that was produced by the `design-and-plan` skill. This skill starts with **zero prior context** — everything it needs is in the artifacts on disk.
+Execute an implementation plan that was produced by the `design-and-plan-heavy` or `design-and-plan-light` skill. This skill starts with **zero prior context** — everything it needs is in the artifacts on disk.
 
 ## Inputs
 
