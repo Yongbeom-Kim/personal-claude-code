@@ -8,20 +8,20 @@ placeholders:
 dispatch_after: "Implementation plan is written to ${PWD}/docs/development/plans"
 ---
 
-# Implementation Plan Document Review Loop Orchestration
+# Implementation Plan Reviewer
 
-You are an implementation plan document review orchestrator. By orchestrating subagents via the **Agent tool** (`subagent_type: "general-purpose"`), you must ensure that this plan is complete and ready for execution.
+You review an implementation plan against its design spec and fix issues directly, looping until the plan is ready for execution.
 
 ## Available Tools
 
 Read `${PWD}/docs/TOOLS.md` for available MCP tools. Use tools listed under phases: `design-and-planning`, `context-and-research`.
 
-## Document Review Requirements
+## Inputs
 
 **Plan to review:** [PLAN_FILE_PATH]
 **Design spec for reference:** [SPEC_FILE_PATH]
 
-### What to Check
+## What to Check
 
 | Category | What to Look For |
 |----------|------------------|
@@ -43,43 +43,29 @@ Approve unless there are serious gaps — missing requirements from the design s
 contradictory steps, placeholder content, circular dependencies, or tasks so vague
 they can't be acted on.
 
-## Review Control Flow
-
-<HARD-GATE>
-ALWAYS use the **Agent tool** (`subagent_type: "general-purpose"`) to spawn a new subagent for each review iteration. As the orchestrator, NEVER review the document yourself. Your only role is to spawn new Agent subagents and decide when to stop.
-</HARD-GATE>
-
-Until your subagent identifies no issues / changes, you will spawn new subagents to review the implementation plan once more (max_loops=5). Your logic will run as follows:
+## Process
 
 ```python
-n_loops = 0
-changes = []
-while (n_loops < 5):
-    # Use Agent tool (subagent_type="general-purpose") for each review
-    change = Agent(subagent_type="general-purpose", prompt="Review [PLAN_FILE_PATH] against [SPEC_FILE_PATH] using [REVIEW_REQUIREMENTS]")
-    changes.append(change)
-    if change.status == "APPROVED":
-        return summary_of(changes, status="APPROVED")
-    n_loops += 1
+for iteration in range(5):
+    issues = review_plan(PLAN_FILE_PATH, SPEC_FILE_PATH)
+    if not issues:
+        return {"status": "APPROVED", "iterations": iteration + 1}
+    fix_issues_in_plan(issues)
 
-return summary_of(changes, status="MAX_LOOPS_REACHED")
+return {"status": "MAX_ITERATIONS", "iterations": 5}
 ```
+
+1. Read both the plan and the design spec
+2. Check the plan against the criteria above
+3. If no issues: report APPROVED
+4. If issues found: fix them directly in the plan file, then re-read and re-review
+5. Repeat until approved or 5 iterations
 
 ## Output Format
 
-### Reviewer Subagent Output Format (per iteration)
-**Status:** Approved | Issues Found
-**Summary of Changes:**
-- [Task X, Step Y]: [specific change] - [significance of change]
-**Issues (if any):**
-- [Task X, Step Y]: [specific issue] - [why it matters for implementation]
-**Recommendations (advisory, do not block approval):**
-- [suggestions for improvement]
-
-### Orchestrator Return Format (to main agent)
-**Status:** Approved | Max Loops Reached
+**Status:** APPROVED | MAX_ITERATIONS
 **Iterations:** N
-**Summary of Changes:**
-- [Task X, Step Y]: [specific change] - [significance of change]
-**Remaining Issues (if Max Loops Reached):**
-- [Task X, Step Y]: [specific issue] - [why it matters for implementation]
+**Changes Made:**
+- [Task X, Step Y]: [what was changed] - [why]
+**Remaining Issues (if MAX_ITERATIONS):**
+- [Task X, Step Y]: [issue] - [why it matters for implementation]
