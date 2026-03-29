@@ -24,7 +24,7 @@ Complete the following items in order:
 
 ## Development Phase Enum
 
-Every MCP tool must be categorized under exactly one of these phases. These phases correspond to the stages of the `design-and-plan-heavy` / `design-and-plan-light` and `implement-from-plan` workflows.
+Every MCP tool must be categorized under exactly one of these phases. These phases correspond to the stages of the `design-and-plan` and `implement-from-plan` workflows.
 
 | Phase | Description | Who Uses It |
 |-------|-------------|-------------|
