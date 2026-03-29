@@ -1,27 +1,6 @@
----
-name: visual-companion
-description: "Browser-based visual companion for showing UI mockups, wireframes, layouts, and design comparisons during frontend design conversations."
----
+# Visual Companion Guide
 
-# Visual Companion
-
-Browser-based companion for showing mockups, wireframes, and layout options during design conversations. Use this when the user needs to **see** something to make a decision — not when the content is textual.
-
-## When to Use
-
-**Use the browser** when the content itself is visual:
-- UI mockups, wireframes, layouts, navigation structures
-- Side-by-side visual comparisons of designs
-- Design polish — spacing, visual hierarchy, look and feel
-- Architecture diagrams, flowcharts, state machines
-
-**Use the terminal** when the content is text or tabular:
-- Requirements, scope, conceptual choices
-- Tradeoff lists, pros/cons, comparison tables
-- Technical decisions, API design
-- Clarifying questions
-
-A question *about* a UI topic is not automatically visual. "What kind of wizard do you want?" is conceptual — terminal. "Which of these wizard layouts works?" is visual — browser.
+Reference for the browser-based visual companion used during frontend design.
 
 ## How It Works
 
@@ -32,7 +11,7 @@ The server watches a directory for HTML files and serves the newest one. You wri
 ## Starting a Session
 
 ```bash
-skills/visual-companion/scripts/start-server.sh --project-dir /path/to/project
+skills/design-frontend/scripts/start-server.sh --project-dir /path/to/project
 ```
 
 Returns JSON:
