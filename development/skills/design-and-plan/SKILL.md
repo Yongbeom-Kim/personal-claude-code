@@ -11,24 +11,36 @@ Collaborate with the user to turn an idea into a reviewed design doc and impleme
 Do NOT write any code, scaffold any project, or invoke any implementation skill. This skill ends after the implementation plan is reviewed.
 </HARD-GATE>
 
+## Inputs
+
+This skill accepts an optional frontend design spec produced by the `design-frontend` skill:
+
+```
+/development:design-and-plan <frontend_design_spec_path>
+```
+
+If a frontend spec path is provided, read it at the start. It contains validated visual decisions (layouts, components, screens) that should be incorporated into the design doc — do not re-ask questions the frontend spec already answers.
+
 ## Steps
 
 Create a task for each step and complete them in order:
 
 1. **Register tools**: Execute the `register-development-tools` skill.
-2. **Explore project context**: Check files, docs, recent commits.
-3. **Clarifying questions**: Ask **4–7 rounds** via `AskUserQuestion` (up to 4 questions per round, prefer multiple-choice). After each round, re-explore context based on answers.
+2. **Read frontend spec** (if provided): Read the frontend design spec. Note which areas are already decided (UI layouts, component inventory, responsive behavior) so you can skip those in clarifying questions.
+3. **Explore project context**: Check files, docs, recent commits.
+4. **Clarifying questions**: Ask **4–7 rounds** via `AskUserQuestion` (up to 4 questions per round, prefer multiple-choice). After each round, re-explore context based on answers.
     - <WARNING>No clarification is too small. Miscommunicated assumptions cause the most wasted work.</WARNING>
     - Early rounds: purpose/scope/success criteria. Middle: constraints/dependencies/edge cases. Later: design preferences/verification.
-4. **Propose 2-3 approaches**: Trade-offs and your recommendation. This is the last human feedback before autonomous work.
-5. **Write design doc**: Save to `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`.
-6. **Design spec review**: Read `./design-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`). Do NOT proceed until the agent completes and you've read its output.
-7. **Write implementation plan**: Re-read the (potentially updated) design doc, then invoke the `write-implementation-plan` skill.
-8. **Implementation plan review**: Read `./implementation-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`).
+    - If a frontend spec was provided, focus on technical architecture, data flow, API design, and backend concerns — skip visual/UI questions already answered by the spec.
+5. **Propose 2-3 approaches**: Trade-offs and your recommendation. This is the last human feedback before autonomous work.
+6. **Write design doc**: Save to `${PWD}/docs/development/design/YYYY-MM-DD-<topic>-design.md`. If a frontend spec was provided, incorporate its visual decisions into the design doc (reference or inline the relevant sections).
+7. **Design spec review**: Read `./design-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`). Do NOT proceed until the agent completes and you've read its output.
+8. **Write implementation plan**: Re-read the (potentially updated) design doc, then invoke the `write-implementation-plan` skill.
+9. **Implementation plan review**: Read `./implementation-spec-document-reviewer-prompt.md` and use it as the prompt for a **foreground Agent tool call** (`subagent_type: "general-purpose"`).
 
 ### Output
 
-After step 8, print a copy-pasteable command for a fresh window and stop:
+After step 9, print a copy-pasteable command for a fresh window and stop:
 
 ```
 ## Ready for Implementation
