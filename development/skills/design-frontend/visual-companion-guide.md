@@ -25,7 +25,7 @@ Save `screen_dir` and `state_dir`. Tell the user to open the URL.
 
 **Platform notes:**
 - **Linux/macOS:** Default mode works — the script backgrounds the server.
-- **Windows:** Use `run_in_background: true` on the Bash tool call.
+- **Windows:** Run the launcher in a background shell or terminal session if your environment does not auto-daemonize.
 - **Remote/containerized:** Use `--host 0.0.0.0 --url-host localhost` if the URL is unreachable.
 
 ## The Loop
@@ -34,7 +34,7 @@ Save `screen_dir` and `state_dir`. Tell the user to open the URL.
    - Before each write, check `$STATE_DIR/server-info` exists (server auto-exits after 30min idle)
    - Use semantic filenames: `layout.html`, `nav-options.html`
    - Never reuse filenames — each screen gets a fresh file
-   - Use the Write tool, never cat/heredoc
+   - Write files with your agent’s file tools (avoid shell heredocs that bypass the companion)
 
 2. **Tell user what's on screen and end your turn:**
    - Remind them of the URL

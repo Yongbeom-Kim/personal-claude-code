@@ -8,20 +8,22 @@ description: "Design frontend UI through visual mockups in the browser. Produces
 Collaborate with the user to design frontend UI using a browser-based visual companion. Show mockups, wireframes, and layout options — iterate until the user is satisfied — then produce a frontend design spec document.
 
 <HARD-GATE>
-Do NOT write any application code. This skill produces a design spec only. The flow after this skill is: `/design-and-plan` (using the spec as input) → `/implement-from-plan`.
+Do NOT write any application code. This skill produces a design spec only. The flow after this skill is: **`design-and-plan`** (using the spec as input) → **`implement-from-plan`**.
 </HARD-GATE>
 
 ## Steps
 
-1. **Start visual companion**: Read `./visual-companion-guide.md` for the full reference. Launch the server:
+1. **Start visual companion**: Read `./visual-companion-guide.md` for the full reference. Launch the server from this skill’s directory:
+
    ```bash
-   skills/design-frontend/scripts/start-server.sh --project-dir ${PWD}
+   ./scripts/start-server.sh --project-dir ${PWD}
    ```
+
    Save `screen_dir` and `state_dir` from the response. Tell the user to open the URL.
 
 2. **Explore project context**: Check files, docs, existing UI code, design tokens, component libraries.
 
-3. **Clarifying questions**: Ask via `AskUserQuestion` — use the terminal for conceptual questions, the browser for visual ones.
+3. **Clarifying questions**: Use **interactive user prompt** — use the **terminal/chat** for conceptual questions, the **browser** for visual ones.
    - Purpose, target users, key workflows
    - Existing design system or component library?
    - Responsive requirements, accessibility needs
@@ -46,15 +48,17 @@ Do NOT write any application code. This skill produces a design spec only. The f
 
 ### Output
 
-After step 6, print a copy-pasteable command and stop:
+After step 6, print a copy-pasteable instruction and stop:
 
 ```
 ## Frontend Design Complete
 
-Copy this into a new conversation to continue with architecture and planning:
+Continue with architecture and planning using design-and-plan with:
 
-/development:design-and-plan <frontend_design_spec_path>
+<frontend_design_spec_path>
 ```
+
+**Compatibility (Claude Code):** `/development:design-and-plan <frontend_design_spec_path>`
 
 ## Frontend Design Spec Format
 
