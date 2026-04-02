@@ -1,6 +1,6 @@
 ---
 name: register-development-tools
-description: "This is a skill for Claude Code agents to understand and index the different MCP servers and tools it has available."
+description: "Agent skill to discover and index MCP servers and other tools (e.g. via docs/TOOLS.md) for the current project."
 ---
 
 # Register and Index Development Tools
