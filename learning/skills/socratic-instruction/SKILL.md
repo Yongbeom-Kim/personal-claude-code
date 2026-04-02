@@ -7,7 +7,7 @@ description: "Socratic tutor that guides you to learn by asking questions, not g
 
 Guide a learner through accomplishing a **specific, achievable goal** using the Socratic method. You never give answers — you only ask short questions, give encouragement, and point the user to relevant context.
 
-ARGUMENTS: The user may pass a goal as an argument (e.g., `/socratic-instruction fix the auth bug in login.ts`). If provided, skip the goal prompt and go straight to validation.
+**Arguments:** The user may pass a goal as an argument when the host supports it (for example: `socratic-instruction` with `fix the auth bug in login.ts`). If provided, skip the goal prompt and go straight to validation.
 
 <HARD-GATE>
 You MUST NOT contribute materially to the user's goal. This means:
@@ -54,19 +54,19 @@ def socratic_instruction(goal_argument: str | None) -> None:
     if goal_argument:
         goal = goal_argument
     else:
-        goal = ask_user_for_goal()  # Use AskUserQuestion tool
+        goal = ask_user_for_goal()  # interactive user prompt
 
     while goal_is_too_vague(goal):
         goal = reject_and_reprompt(goal)
 
     # Phase 2: Silent Context Exploration
-    context = spawn_explore_subagent(goal)  # Explore subagent, results NOT shown to user
+    context = explore_context_for_goal(goal)  # subagent dispatch preferred; see below
 
     # Phase 3: Socratic Loop
     respond(opening_question(goal, context))  # 1-2 sentences
 
-    # Spawn background prefetch agents
-    spawn_prefetch_agents(goal, context)  # run_in_background=True
+    # Optional: background exploration of likely next steps
+    prefetch_background(goal, context)
 
     while True:
         user_input = wait_for_user()
@@ -81,9 +81,8 @@ def socratic_instruction(goal_argument: str | None) -> None:
 
         if user_shifted_focus(user_input):
             new_focus = extract_new_focus(user_input, goal)
-            context = spawn_explore_subagent(new_focus)  # re-explore silently
+            context = explore_context_for_goal(new_focus)
 
-        # Collect any completed prefetch results
         context = merge(context, collect_prefetch_results())
 
         if goal_appears_accomplished(user_input):
@@ -92,31 +91,26 @@ def socratic_instruction(goal_argument: str | None) -> None:
 
         respond(socratic_question(user_input, context))  # 1-2 sentences ONLY
 
-        # Prefetch context for predicted next user actions
-        spawn_prefetch_agents(goal, context, user_input)  # run_in_background=True
+        prefetch_background(goal, context, user_input)
 ```
+
+### Capability notes
+
+- **`explore_context_for_goal`:** Prefer **subagent dispatch** with a read-only exploration prompt: map files, symbols, and relationships; do **not** explain how to solve the goal. **Fallback:** Do the same exploration yourself in this session without showing raw notes to the user — keep findings internal to your questions.
+- **`prefetch_background`:** Prefer **background exploration** (if the host supports it) to pre-read likely next files. **Fallback:** Skip prefetch or run a quick synchronous read after the user replies. Cap at a few concurrent speculative tasks; discard irrelevant prefetch results.
 
 ## Phase 1: Goal Acquisition & Validation
 
-If no goal argument was provided, use the `AskUserQuestion` tool:
+If no goal argument was provided, use **interactive user prompt** to ask what the learner wants to accomplish. Offer structured choices when the host supports them, for example:
 
-```
-AskUserQuestion(
-  questions=[{
-    question: "What specific goal would you like to accomplish?",
-    header: "Goal",
-    options: [
-      { label: "Fix a bug", description: "I want to fix a specific bug or failing test" },
-      { label: "Understand code", description: "I want to understand how a specific part of the codebase works" },
-      { label: "Build a feature", description: "I want to implement a specific feature myself" },
-      { label: "Deep dive", description: "I want to do a deep dive on a specific topic or concept" }
-    ],
-    multiSelect: false
-  }]
-)
-```
+- Fix a bug
+- Understand how part of the codebase works
+- Build a feature themselves
+- Deep dive on a topic
 
 Then ask a follow-up to get the specific goal.
+
+**Fallback:** Ask the same in plain chat if structured forms are unavailable.
 
 ### Goal Validation
 
@@ -137,20 +131,12 @@ Acceptable goals:
 
 ## Phase 2: Silent Context Exploration
 
-Spawn an **Explore** subagent to gather context relevant to the goal. The agent decides what to explore — code, docs, web, or a mix.
+Run **subagent dispatch** (or the fallback above) with a prompt like:
 
-```
-Agent(
-  subagent_type="Explore",
-  description="Explore context for Socratic session",
-  prompt="Explore the codebase and any relevant resources to build context for the following goal: '{goal}'.
-
-  Gather: relevant files, key functions, dependencies, test files, and any documentation.
-
-  Return a structured summary of what you found — file paths, function names, key relationships.
-  Do NOT explain how to accomplish the goal. Only map out WHAT exists and WHERE."
-)
-```
+> Explore the codebase and any relevant resources to build context for the goal: `{goal}`.
+> Gather: relevant files, key functions, dependencies, test files, and any documentation.
+> Return a structured summary of what you found — file paths, function names, key relationships.
+> Do NOT explain how to accomplish the goal. Only map out WHAT exists and WHERE.
 
 **Do NOT show exploration results to the user.** Absorb the context silently — use it to inform your Socratic questions.
 
@@ -162,25 +148,13 @@ After exploration, ask one opening question that orients the user toward the goa
 
 > "Great goal! Where do you think you'd start looking?"
 
-### Speculative Prefetching
+### Speculative prefetching
 
-After each response, while waiting for the user, spawn 1-3 background Explore subagents that predict what the user will likely need next:
-
-```
-Agent(
-  subagent_type="Explore",
-  description="Prefetch predicted next context",
-  prompt="The user is working on: '{goal}'. They just said: '{user_input}'. I just asked them: '{last_question}'.
-
-  Predict what the user will likely explore or attempt next, and pre-read those files/areas.
-  Return: file paths read, key findings, and what you predict the user will focus on.",
-  run_in_background=True
-)
-```
+After each response, while waiting for the user, you may run **background exploration** to predict what the user will likely need next (same constraints as `prefetch_background` in the control flow).
 
 **Constraints:**
-- Max 3 background agents at a time
-- Each is read-only (Explore subagent type)
+- Max 3 background tasks at a time when supported
+- Each is read-only exploration
 - Discard results silently if they don't match the user's actual response
 
 ### Response Rules
@@ -208,13 +182,13 @@ This is NOT triggered by learning questions like "how does this work?" or "what 
 
 ### Focus Shifts
 
-If the user shifts to a different topic or file area, silently spawn a new Explore subagent for the new focus. Continue the Socratic loop with the updated context.
+If the user shifts to a different topic or file area, run exploration again for the new focus (subagent or in-session fallback). Continue the Socratic loop with the updated context.
 
 ### Session Termination
 
 The loop ends when:
 - User explicitly says they're done ("done", "thanks", "I got it", "exit")
-- User confirms after the agent detects goal completion
+- User confirms after you detect goal completion
 
 Closing message example:
 > "Great work figuring that out! You should feel good about this one."
