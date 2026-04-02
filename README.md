@@ -53,6 +53,17 @@ npx skills add Yongbeom-Kim/personal-claude-code --skill design-and-plan socrati
 
 Use `--copy` if you prefer copies instead of symlinks into agent directories.
 
+If **`npx skills add` fails to clone** with `SSL_ERROR_SYSCALL` or similar over HTTPS (common behind corporate proxies/VPNs), try:
+
+```bash
+# SSH (needs GitHub SSH key)
+npx skills add git@github.com:Yongbeom-Kim/personal-claude-code.git --list
+
+# Or clone yourself, then point at the local repo
+git clone git@github.com:Yongbeom-Kim/personal-claude-code.git
+npx skills add ./personal-claude-code --all --agent cursor -y
+```
+
 ## Plugins
 
 ### Development (v1.0.5)
