@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Review and fix code changes"
+description: "Review and fix code changes"
 placeholders:
   - "[CHANGED_FILES_LIST]: List of changed file paths"
   - "[DIFF_CONTENT]: The diff output"
@@ -50,7 +48,7 @@ Look for unnecessary complexity in the changed code:
 
 ### 4. Style Consistency
 Ensure changed code matches repository conventions:
-- Check style docs (CONTRIBUTING.md, CLAUDE.md, etc.) and linter configs
+- Check style docs (CONTRIBUTING.md, AGENTS.md, etc.) and linter configs
 - Compare with neighboring files for naming, import ordering, patterns
 - Only flag clear inconsistencies, not preferences
 

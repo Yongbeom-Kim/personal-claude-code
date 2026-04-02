@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Spec compliance review for Task N"
+description: "Spec compliance review for Task N"
 placeholders:
   - "[FULL TEXT of task requirements]: Complete requirements from plan"
   - "[From implementer's report]: Implementer's claims about what they built"

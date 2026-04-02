@@ -7,7 +7,7 @@ description: "Agent skill to discover and index MCP servers and other tools (e.g
 
 The most important part of agentic development is for you to understand what are the tools you have available to you, and what purpose they should be used for.
 
-These tools will be saved in a `${PWD}/docs/TOOLS.md` file.
+These tools will be saved in a `${PWD}/docs/TOOLS.md` file. This workflow uses **artifact read/write** under the current working directory and **tool discovery** (list MCP servers, reconcile with the index) — it does not depend on a specific vendor’s tool names.
 
 <REQUIREMENT>
 The `${PWD}/docs/TOOLS.md` file must be relative to the directory you are invoked in. Do NOT infer where the `docs/` directory based on signals such as git directories. Directly use the current working directory.

@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Implement Task N: [task name]"
+description: "Implement Task N: [task name]"
 placeholders:
   - "[task name]: Name of the task from the plan"
   - "[FULL TEXT of task]: Complete task description from plan"

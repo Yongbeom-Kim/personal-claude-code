@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Review implementation plan document"
+description: "Review implementation plan document"
 placeholders:
   - "[PLAN_FILE_PATH]: Path to the implementation plan"
   - "[SPEC_FILE_PATH]: Path to the design spec for reference"

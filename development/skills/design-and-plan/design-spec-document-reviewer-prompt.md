@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Review design spec document"
+description: "Review design spec document"
 placeholders:
   - "[SPEC_FILE_PATH]: Path to the design spec document"
 dispatch_after: "Design spec is written to ${PWD}/docs/development/design"

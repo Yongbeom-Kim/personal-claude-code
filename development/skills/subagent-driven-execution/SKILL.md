@@ -5,11 +5,13 @@ description: Use when executing implementation plans with independent tasks in t
 
 # Subagent-Driven Execution
 
-Execute plan by dispatching fresh subagent per task, with two-stage review after each. Each reviewer self-loops: it reviews, fixes issues directly, and re-reviews until passing.
+Execute the plan by dispatching a fresh subagent per task, with two-stage review after each. Each reviewer self-loops: it reviews, fixes issues directly, and re-reviews until passing.
 
-**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you ensure they stay focused and succeed at their task. They should never inherit your session's context or history — you construct exactly what they need. This also preserves your own context for coordination work.
+**Why subagents:** You delegate tasks to specialized agents with isolated context. By precisely crafting their instructions and context, you keep them focused. They should not inherit your session’s full history — you supply exactly what they need. This preserves your context for coordination.
 
-**Available Tools:** Read `${PWD}/docs/TOOLS.md` for available MCP tools. When dispatching subagents, ensure each subagent prompt includes the TOOLS.md reference with the appropriate phases for its role (see phase assignments in each prompt template).
+**Fallback:** If **subagent dispatch** is unavailable, run each role yourself in sequence in this session: implementer → spec compliance reviewer → code quality reviewer, using the same prompt files and iteration limits. Do not parallelize implementation tasks.
+
+**Available Tools:** Read `${PWD}/docs/TOOLS.md` for available MCP tools. When dispatching subagents, ensure each prompt includes the TOOLS.md reference with the appropriate phases for its role (see phase assignments in each prompt template).
 
 **Core principle:** Fresh subagent per task + self-looping reviewers = high quality, minimal orchestration overhead
 
@@ -86,13 +88,13 @@ Implementer subagents report one of four statuses. Handle each appropriately:
 
 ## Prompt Templates
 
-Each prompt file has a yaml frontmatter with `agent.subagent_type` and `agent.description`. Read the file, fill in the placeholders, and pass the content below `---` as the prompt to the **Agent tool**.
+Each prompt file has YAML frontmatter with a short `description` and optional `placeholders`. Read the file, fill in the placeholders, and pass the Markdown body **below** `---` as the prompt for **foreground subagent dispatch** (wait for completion before continuing).
 
-- `./implementer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`)
-- `./spec-compliance-reviewer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`) — self-loops until APPROVED
-- `./code-quality-reviewer-prompt.md` — Agent tool (`subagent_type: "general-purpose"`) — self-loops until APPROVED
+- `./implementer-prompt.md` — implementation subagent
+- `./spec-compliance-reviewer-prompt.md` — self-loops until APPROVED
+- `./code-quality-reviewer-prompt.md` — self-loops until APPROVED
 
-Reviewers handle their own fix→re-review loop internally. You (the orchestrator) just dispatch them and wait for their final status. Do not manage re-review iterations yourself.
+Reviewers handle their own fix→re-review loop internally. You (the orchestrator) dispatch them and wait for their final status. Do not manage re-review iterations yourself.
 
 ## Example Workflow
 
@@ -102,7 +104,7 @@ Reviewers handle their own fix→re-review loop internally. You (the orchestrato
 
 Task 1: Hook installation script
 
-[Dispatch implementation subagent with full task text + context]
+[Foreground subagent dispatch: implementer prompt with full task text + context]
 
 Implementer: "Before I begin - should the hook be installed at user or system level?"
 You: "User level (~/.config/superpowers/hooks/)"
@@ -111,28 +113,28 @@ Implementer: DONE
   - Added tests, 5/5 passing
   - Committed
 
-[Dispatch spec compliance reviewer — it self-loops internally]
+[Foreground subagent dispatch: spec compliance reviewer — it self-loops internally]
 Spec reviewer: APPROVED (1 iteration)
 
-[Dispatch code quality reviewer — it self-loops internally]
+[Foreground subagent dispatch: code quality reviewer — it self-loops internally]
 Code quality reviewer: APPROVED (1 iteration)
 
 [Mark Task 1 complete]
 
 Task 2: Recovery modes
 
-[Dispatch implementation subagent with full task text + context]
+[Foreground subagent dispatch: implementer]
 Implementer: DONE
   - Added verify/repair modes
   - 8/8 tests passing
   - Committed
 
-[Dispatch spec compliance reviewer]
+[Foreground subagent dispatch: spec compliance reviewer]
 Spec reviewer: APPROVED (2 iterations)
   - Iteration 1: missing progress reporting, extra --json flag → fixed both
   - Iteration 2: all requirements met
 
-[Dispatch code quality reviewer]
+[Foreground subagent dispatch: code quality reviewer]
 Code quality reviewer: APPROVED (2 iterations)
   - Iteration 1: magic number (100) → extracted PROGRESS_INTERVAL constant
   - Iteration 2: approved
@@ -163,5 +165,5 @@ Done!
 - Don't rush them into implementation
 
 **If subagent fails task:**
-- Dispatch fix subagent with specific instructions
-- Don't try to fix manually (context pollution)
+- Dispatch fix pass with specific instructions (or take the implementer role yourself in fallback mode)
+- Don't try to fix manually in a way that loses the review gates (avoid context pollution without checkpoints)

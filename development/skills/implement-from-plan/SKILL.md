@@ -9,27 +9,16 @@ Execute an implementation plan that was produced by the `design-and-plan` skill.
 
 ## Inputs
 
-Expected invocation format:
+Expected information from the user:
 
-```
-/development:implement-from-plan Design Doc: <path>, Implementation Plan: <path>
-```
+- **Design Doc:** path to the design spec
+- **Implementation Plan:** path to the plan
 
-Parse the `Design Doc:` and `Implementation Plan:` paths from the arguments. If paths are not provided, ask the user:
+Parse `Design Doc:` and `Implementation Plan:` from the user message when provided. If either path is missing, use **interactive user prompt** to ask for:
+- which design spec file to use
+- which implementation plan file to use
 
-```
-AskUserQuestion(
-  questions=[{
-    question: "Which design spec does it correspond to?",
-    header: "Design spec file path",
-    options: []
-  }, {
-    question: "Which implementation plan should I execute?",
-    header: "Implementation plan file path",
-    options: []
-  }]
-)
-```
+**Fallback:** If structured forms are unavailable, ask in plain chat until both paths are known.
 
 ## Steps
 

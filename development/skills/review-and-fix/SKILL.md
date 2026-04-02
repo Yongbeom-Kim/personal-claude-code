@@ -5,12 +5,12 @@ description: "Review code changes with a single self-looping reviewer subagent t
 
 # Review and Fix
 
-Dispatch a single reviewer subagent that reviews code changes across correctness, simplification, and style dimensions, fixes P1/P2 issues directly, and loops until only P3 (stylistic) issues remain.
+Dispatch a single reviewer with isolated context that reviews code changes across correctness, simplification, and style dimensions, fixes P1/P2 issues directly, and loops until only P3 (stylistic) issues remain.
 
 ## When to Use
 
-- **Standalone:** User invokes `/review-and-fix` directly after making changes
-- **Embedded:** Called from `implement-from-plan` as the final review step (runs in a subagent)
+- **Standalone:** User invokes the `review-and-fix` workflow directly after making changes
+- **Embedded:** Called from `implement-from-plan` as the final review step (typically via **foreground subagent dispatch** when available)
 
 ## Inputs
 
@@ -20,22 +20,12 @@ Dispatch a single reviewer subagent that reviews code changes across correctness
 | `SPEC_FILE_PATH` | No | Passed by `implement-from-plan` |
 | `PLAN_FILE_PATH` | No | Passed by `implement-from-plan` |
 
-If `BASE_SHA` is not provided as an argument, ask the user interactively:
+If `BASE_SHA` is not provided as an argument, use **interactive user prompt** to choose a base for the diff, for example:
+- previous commit (`HEAD~1`)
+- main branch tip
+- merge base with main
 
-```
-AskUserQuestion(
-  questions=[{
-    question: "What base commit should I diff against?",
-    header: "Base SHA",
-    options: [
-      { label: "HEAD~1", description: "Compare against the previous commit" },
-      { label: "main/master", description: "Compare against the main branch" },
-      { label: "Merge base", description: "Auto-detect merge base with main branch" }
-    ],
-    multiSelect: false
-  }]
-)
-```
+**Fallback:** Ask in plain chat which base to use.
 
 ## Control Flow
 
@@ -47,7 +37,7 @@ def review_and_fix(base_sha=None, spec_path=None, plan_path=None):
     diff = git_diff(base_sha, working_tree=True)
     changed_files = extract_changed_files(diff)
 
-    # Dispatch single reviewer — it self-loops internally
+    # Foreground subagent dispatch — reviewer self-loops internally
     result = dispatch_reviewer(
         changed_files=changed_files,
         diff=diff,
@@ -58,9 +48,11 @@ def review_and_fix(base_sha=None, spec_path=None, plan_path=None):
     print_summary(result)
 ```
 
+**Fallback:** If subagents are unavailable, perform the same review yourself using `./reviewer-prompt.md` as your checklist, preserving the fix→test→re-review loop and iteration limit.
+
 ## Dispatching the Reviewer
 
-Read `./reviewer-prompt.md`, fill in placeholders, and dispatch as a **foreground** Agent tool call (`subagent_type: "general-purpose"`).
+Read `./reviewer-prompt.md`, fill in placeholders, and run a **foreground subagent dispatch** with the prompt body (content below the YAML frontmatter).
 
 Placeholders:
 - `[CHANGED_FILES_LIST]`: List of files from `git diff --name-only BASE_SHA`

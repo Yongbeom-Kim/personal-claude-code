@@ -1,7 +1,5 @@
 ---
-agent:
-  subagent_type: general-purpose
-  description: "Code quality review for Task N"
+description: "Code quality review for Task N"
 placeholders:
   - "[WHAT_WAS_IMPLEMENTED]: From implementer's report"
   - "[PLAN_OR_REQUIREMENTS]: Task N from plan file"
